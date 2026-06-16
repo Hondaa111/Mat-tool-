@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAT Task Manager</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .logo {
+            height: 50px;
+            flex-shrink: 0;
+        }
+
+        .title-center {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        h1 {
+            color: #ff8c00;
+            font-size: 32px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 700;
+            color: #2d2d2d;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        select, input {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            font-family: inherit;
+            background-color: #f5f5f5;
+            color: #2d2d2d;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #ff8c00;
+            box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.2);
+        }
+
+        select {
+            cursor: pointer;
+        }
+
+        select option {
+            background-color: #ffffff;
+            color: #2d2d2d;
+        }
+
+        select:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: #e8e8e8;
+        }
+
+        .response-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .response-display {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 6px;
+            border-left: 4px solid #ff8c00;
+            min-height: 80px;
+            display: flex;
+            align-items: flex-start;
+            color: #2d2d2d;
+            font-weight: 500;
+            word-break: break-word;
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+
+        .response-display.empty {
+            color: #999;
+            font-style: italic;
+        }
+
+        button {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #ff8c00 0%, #ff7a00 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-size: 14px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 140, 0, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .copy-btn {
+            background: linear-gradient(135deg, #00bcd4 0%, #0097a7 100%);
+            width: 100%;
+        }
+
+        .copy-btn:hover {
+            box-shadow: 0 5px 20px rgba(0, 188, 212, 0.4);
+        }
+
+        .clear-btn {
+            background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
+            width: 100%;
+            color: #2d2d2d;
+        }
+
+        .clear-btn:hover {
+            box-shadow: 0 5px 20px rgba(255, 193, 7, 0.4);
+        }
+
+        .buttons-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .motivation {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: #ff8c00;
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #00bcd4;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 6px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            display: none;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            display: block;
+            animation: slideIn 0.3s ease-in-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <svg class="logo" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
+                <!-- Straight Logo with Curved Bars -->
+                <rect x="10" y="10" width="170" height="12" rx="6" fill="#00bcd4"/>
+                <rect x="20" y="34" width="160" height="12" rx="6" fill="#ffc107"/>
+                <rect x="30" y="58" width="150" height="12" rx="6" fill="#ff8c00"/>
+            </svg>
+            <div class="title-center">
+                <h1>MAT Task Manager</h1>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="taskType"><b>Task Type</b></label>
+                <select id="taskType">
+                    <option value="">-- Select Task Type --</option>
+                    <option value="Quote Request [Change Flight]">Quote Request [Change Flight]</option>
+                    <option value="Exchange">Exchange</option>
+                    <option value="Quote Request [Cancel]">Cancel</option>
+                    <option value="Quote Request [FTC]">Quote Request [FTC]</option>
+                    <option value="Quote Request [Name Correction]">Quote Request [Name Correction]</option>
+                    <option value="Voluntary Refund Fulfillment">Voluntary Refund Fulfillment</option>
+                    <option value="Work Order Process [Cancel Cancel Itinerary]">Work Order Process [Cancel Cancel Itinerary]</option>
+                    <option value="Work Order Process [Ssr Replace Gender]">Work Order Process [Ssr Replace Gender]</option>
+                    <option value="Work Order Process [Ssr Replace Date Of Birth]">Work Order Process [Ssr Replace Date Of Birth]</option>
+                    <option value="Quote Request [Waived Refund]">Quote Request [Waived Refund]</option>
+                    <option value="Refund Investigation">Refund Investigation</option>
+                    <option value="Quote Request [SC Change Flight] (MILA)">Quote Request [SC Change Flight] (MILA)</option>
+                    <option value="Work Order Process [Ssr Replace Disability Indicators] (MILA)">Work Order Process [Ssr Replace Disability Indicators] (MILA)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="reason"><b>Reason</b></label>
+                <select id="reason" disabled>
+                    <option value="">-- Select Task First --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="actionRequired"><b>Action Required</b></label>
+                <select id="actionRequired">
+                    <option value="">-- Select Action --</option>
+                    <option value="Solve">Solve</option>
+                    <option value="Abort">Abort</option>
+                    <option value="Reject">Reject</option>
+                    <option value="Sleep">Sleep</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group" style="grid-column: 1 / -1;">
+                <label><b>Generated Response</b></label>
+                <div class="response-container">
+                    <div class="response-display empty" id="response">
+                        Response will appear here...
+                    </div>
+                    <div class="buttons-row">
+                        <button class="copy-btn" onclick="copyToClipboard()">📋 Copy to Clipboard</button>
+                        <button class="clear-btn" onclick="clearForm()">🗑️ Clear</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="motivation">
+            ✨ Every task moves us forward ✨
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // Task-specific reason mappings
+        const taskReasons = {
+            "Quote Request [Change Flight]": [
+                "Transfer to a live agent",
+                "No Availability",
+                "Different Cabin",
+                "No Combinability",
+                "AL Doesn't Operate",
+                "Same Date Without Preferences",
+                "No Seats Available",
+                "Not Permitted",
+                "Checked In",
+                "Exceeding Ticket Validity",
+                "Ticket Under Airline Control",
+                "NON GDS"
+            ],
+            "Exchange": [
+                "Transfer to a live agent",
+                "CC Expired",
+                "AFFIRMINC",
+                "CC Decline"
+            ],
+            "Quote Request [FTC]": [
+                "Transfer to a live agent",
+                "Not Permitted",
+                "NON GDS",
+                "Ticket Under Airline Control"
+            ],
+            "Quote Request [Name Correction]": [
+                "Transfer to a live agent",
+                "Not Permitted",
+                "No Passport",
+                "Ticket Under Airline Control",
+                "Not Required",
+                "Imminent Flight",
+                "NON GDS"
+            ],
+            "Voluntary Refund Fulfillment": [
+                "Transfer to a live agent",
+                "Not Permitted",
+                "No Remaining Value",
+                "Checked In"
+            ],
+            "Work Order Process [Cancel Cancel Itinerary]": [
+                "Transfer to a live agent",
+                "Not Permitted",
+                "Ticket Under Airline Control"
+            ],
+            "Work Order Process [Ssr Replace Gender]": [
+                "Transfer to a live agent",
+                "Not Permitted",
+                "Ticket Under Airline Control"
+            ],
+            "Work Order Process [Ssr Replace Date Of Birth]": [
+                "Transfer to a live agent",
+                "Not Permitted",
+                "Ticket Under Airline Control"
+            ],
+            "Quote Request [Waived Refund]": [
+                "Transfer to a live agent",
+                "Not Permitted",
+                "Missing Documents",
+                "Incorrect Documents"
+            ],
+            "Refund Investigation": [
+                "Transfer to a live agent"
+            ],
+            "Quote Request [SC Change Flight] (MILA)": [
+                "Transfer to a live agent",
+                "Different Origin",
+                "Imminent Flight",
+                "Quote for Entire Trip"
+            ],
+            "Quote Request [Cancel]": [
+                "Transfer to a live agent",
+                "Not Permitted",
+                "Ticket Under Airline Control",
+                "No Remaining Value",
+                "Checked In",
+                "NON GDS"
+            ],
+            "Work Order Process [Ssr Replace Disability Indicators] (MILA)": [
+                "Transfer to a live agent",
+                "Not Confirmed",
+                "Another One Was Requested"
+            ]
+        };
+
+        // Response mappings for reasons
+        const reasonResponses = {
+            "Transfer to a live agent": "Transfer to a live agent",
+            "No Availability": "No flights are operated by the airline on the requested date. No flights or fares are available within ±2 days of the requested date. The passenger may select an alternative travel date.",
+            "Different Cabin": "No seats are available in Economy Class on the requested date. Seats are available in Business Class, or the passenger may choose another date to check availability.",
+            "Wrong Calculation": "No flights or fares are available within ±2 days of the requested date. The passenger may select a different travel date.",
+            "No Combinability": "No fares were found within ±2 days of the requested date. The passenger may select a different travel date.",
+            "AL Doesn't Operate": "The airline does not operate flights to or from the requested city.",
+            "Same Date Without Preferences": "The requested travel date remains unchanged, and no preferences were provided. The request requires further clarification.",
+            "No Seats Available": "No seats are available on the requested date or within ±2 days. The passenger may select a different travel date.",
+            "Not Permitted": "The request is not allowed according to the airline's rules or restrictions.",
+            "Exceeding Ticket Validity": "The requested change would exceed the ticket validity period. The entire journey must be completed within the ticket's validity.",
+            "Ticket Under Airline Control": "The ticket is currently under the airline's control. The passenger must contact the airline directly to verify eligibility.",
+            "Checked In": "The passenger has already checked in. They must contact the airline to remove the check-in status before eligibility can be reviewed.",
+            "NON GDS": "Due to the nature of the ticket, eligibility must be verified directly with the airline.",
+            "No Passport": "A valid passport must be uploaded to check eligibility.",
+            "Not Required": "The middle name is not required.",
+            "Imminent Flight": "The flight departure is imminent, and the airline's review process may take longer than the available time. The passenger should contact the airline directly.",
+            "SC on the File": "There is an SC on the booking.",
+            "No SC": "No SC is present, and standard fare rules apply.",
+            "No Remaining Value": "There is no remaining value available for refund.",
+            "Incorrect Documents": "The submitted documents are invalid. The passenger must provide valid documentation.",
+            "Missing Documents": "Required documents have not been provided. The passenger must upload the necessary documents.",
+            "Different Origin": "The origin and destination must remain unchanged.",
+            "Quote for Entire Trip": "A quote must be obtained for the entire itinerary, as both outbound and inbound segments are affected.",
+            "Not Confirmed": "Advance wheelchair requests are not available. The passenger must contact the airline directly.",
+            "Duplicate Request": "A wheelchair request already exists. Multiple wheelchair requests cannot be submitted for the same booking.",
+            "Pending Request": "There is a pending request. The passenger may follow up at a later time.",
+            "CC Expired": "The credit card on file has expired. The passenger must update the card.",
+            "AFFIRMINC": "A new card must be added, as the passenger paid using an Affirm card.",
+            "CC Decline": "The payment was declined. The passenger must ensure sufficient funds are available or provide an alternative payment method.",
+            "Another One Was Requested": "Another request was already submitted for this booking."
+        };
+
+        // Load on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            updateResponse();
+        });
+
+        // Update response when any field changes
+        document.getElementById('taskType').addEventListener('change', () => {
+            handleTaskChange();
+        });
+        document.getElementById('actionRequired').addEventListener('change', updateResponse);
+        document.getElementById('reason').addEventListener('change', updateResponse);
+
+        function handleTaskChange() {
+            const taskType = document.getElementById('taskType').value;
+            const reasonSelect = document.getElementById('reason');
+
+            // Reset selections
+            reasonSelect.value = '';
+
+            if (!taskType) {
+                reasonSelect.disabled = true;
+                reasonSelect.innerHTML = '<option value="">-- Select Task First --</option>';
+                updateResponse();
+                return;
+            }
+
+            // Special handling for Refund Investigation
+            if (taskType === 'Refund Investigation') {
+                reasonSelect.disabled = true;
+                reasonSelect.innerHTML = '<option value="">-- Auto --</option>';
+                updateResponse();
+                return;
+            }
+
+            // Special handling for Voluntary Refund Fulfillment
+            if (taskType === 'Voluntary Refund Fulfillment') {
+                reasonSelect.disabled = true;
+                reasonSelect.innerHTML = '<option value="">-- Auto (No selection needed) --</option>';
+                updateResponse();
+                return;
+            }
+
+            // Normal handling for other tasks
+            reasonSelect.disabled = false;
+
+            // Populate reason dropdown
+            reasonSelect.innerHTML = '<option value="">-- Select Reason --</option>';
+            const reasons = taskReasons[taskType] || [];
+            reasons.forEach(reason => {
+                const option = document.createElement('option');
+                option.value = reason;
+                option.textContent = reason;
+                reasonSelect.appendChild(option);
+            });
+
+            updateResponse();
+        }
+
+        function updateResponse() {
+            const taskType = document.getElementById('taskType').value;
+            const actionRequired = document.getElementById('actionRequired').value;
+            const reason = document.getElementById('reason').value;
+
+            const responseDiv = document.getElementById('response');
+
+            // Refund Investigation - always show this response
+            if (taskType === 'Refund Investigation') {
+                responseDiv.textContent = 'Verification completed and correct.';
+                responseDiv.classList.remove('empty');
+                return;
+            }
+
+            // Voluntary Refund Fulfillment - based on action
+            if (taskType === 'Voluntary Refund Fulfillment') {
+                if (actionRequired === 'Solve') {
+                    responseDiv.textContent = 'Booking canceled.\nRefund penalty is ___ per adult.\nRefund amount is ___ per adult.\nRefund timeframe is ___ weeks.';
+                    responseDiv.classList.remove('empty');
+                } else if (actionRequired === 'Abort') {
+                    responseDiv.textContent = 'The booking is refundable but the quotation is wrong.\nAmount to be refunded per adult: ___\nNon-refundable tax per adult: ___\nAirline Penalty per adult: ___\nRefund time frame: (1–2 weeks)';
+                    responseDiv.classList.remove('empty');
+                } else if (reason) {
+                    responseDiv.textContent = reasonResponses[reason] || 'No response template available for this combination.';
+                    responseDiv.classList.remove('empty');
+                } else {
+                    responseDiv.textContent = 'Response will appear here...';
+                    responseDiv.classList.add('empty');
+                }
+                return;
+            }
+
+            // Regular tasks - generate response based on reason only
+            if (!taskType || !reason) {
+                responseDiv.textContent = 'Response will appear here...';
+                responseDiv.classList.add('empty');
+                return;
+            }
+
+            let responseText = '';
+
+            // Special case: Sleep action
+            if (actionRequired === 'Sleep') {
+                responseText = 'Accidentally pick up the task, please continue working.';
+            }
+            // Default: Use reason response
+            else {
+                responseText = reasonResponses[reason] || 'No response template available for this combination.';
+            }
+
+            responseDiv.textContent = responseText;
+            responseDiv.classList.remove('empty');
+        }
+
+        function copyToClipboard() {
+            const responseText = document.getElementById('response').textContent;
+
+            if (responseText === 'Response will appear here...') {
+                showToast('Please fill in all fields first!', 'error');
+                return;
+            }
+
+            navigator.clipboard.writeText(responseText).then(() => {
+                showToast('✅ Copied to clipboard!');
+            }).catch(() => {
+                showToast('❌ Failed to copy', 'error');
+            });
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.background = type === 'error' ? '#ff6b6b' : '#00bcd4';
+            toast.classList.add('show');
+        }
+
+        function clearForm() {
+            document.getElementById('taskType').value = '';
+            document.getElementById('actionRequired').value = '';
+            document.getElementById('reason').value = '';
+            document.getElementById('reason').disabled = true;
+            document.getElementById('reason').innerHTML = '<option value="">-- Select Task First --</option>';
+            updateResponse();
+        }
+    </script>
+</body>
+</html>
