@@ -39,7 +39,7 @@
         }
 
         .logo {
-            height: 50px;
+            height: 80px;
             flex-shrink: 0;
         }
 
@@ -223,14 +223,21 @@
 <body>
     <div class="container">
         <div class="header">
-            <svg class="logo" viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg">
-                <!-- FlightHub Logo -->
-                <!-- Cyan Wing -->
-                <path d="M 10 30 L 35 15 L 40 25 L 20 35 Z" fill="#00bcd4"/>
-                <!-- Orange/Yellow Wing -->
-                <path d="M 20 35 L 40 25 L 45 38 L 25 42 Z" fill="#ffc107"/>
-                <!-- Dark Text: FlightHub -->
-                <text x="55" y="28" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#1a1a1a">FlightHub</text>
+            <svg class="logo" viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg">
+                <!-- Cyan Curved Bar -->
+                <path d="M 0 10 Q 50 -5 100 10 L 100 25 Q 50 10 0 25 Z" fill="#00bcd4" opacity="0.9"/>
+                <rect x="0" y="10" width="100" height="15" fill="#00bcd4"/>
+                
+                <!-- Yellow Curved Bar -->
+                <path d="M 20 40 Q 70 25 120 40 L 120 55 Q 70 40 20 55 Z" fill="#ffc107" opacity="0.9"/>
+                <rect x="20" y="40" width="100" height="15" fill="#ffc107"/>
+                
+                <!-- Orange Curved Bar -->
+                <path d="M 40 70 Q 90 55 140 70 L 140 85 Q 90 70 40 85 Z" fill="#ff8c00" opacity="0.9"/>
+                <rect x="40" y="70" width="100" height="15" fill="#ff8c00"/>
+                
+                <!-- FlightHub Text -->
+                <text x="160" y="65" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#1a1a1a">FlightHub</text>
             </svg>
             <div class="title-center">
                 <h1>MAT Task Manager</h1>
